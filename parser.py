@@ -5,6 +5,7 @@
 
 from pattern.web import extension, find_urls, URL, DOM, abs
 import re
+from bs4 import BeautifulSoup
 
 # <codecell>
 
@@ -32,16 +33,115 @@ for item in urls:
     if re.search(r'rs[\d]+', lower):
         relevant_links.append(lower)
         
-print relevant_links
+#print relevant_links
+
+for page in relevant_links:
+    print page
     
 
 # <codecell>
 
-for relevant_link in relevant_links:
-    data = URL(relevant_link)
+snpedia_data = {}
+
+for page in relevant_links:
+
+    #for relevant_link in test_link:
+    data = URL(page)
     site = data.download()
     
+    soup = BeautifulSoup(site)
+    rsid_upper = soup.find("h1", attrs={'class':"firstHeading"}).getText()
+    rsid = str(rsid_upper.lower())
+    orientation = soup.find("a", attrs={'title':"Orientation"}).findNext().getText().lower()
+    gmaf = soup.find("a", attrs={'title':"GMAF"}).findNext().getText().lower()
+    
+    table_data = soup.findAll('td')
+    for entry in table_data:
+        if entry.getText() == "Chromosome":
+            chromosome = entry.findNext().getText().lower()   #assign this to snpedia_data
+        if entry.getText() == "Gene":
+            gene = entry.findNext().getText().lower()
+        if entry.getText() == "Position":
+            position = entry.findNext().getText().lower()
+            
+    open_snp_link = "http://opensnp.org/snps/" + rsid_upper
+        
+    magnitude = soup.find("a", attrs={'title':"Max Magnitude"}).findNext().getText().lower()
+    
+    if soup.find("table", attrs={'class':"sortable"}) == None:
+        pairs = []
+    else:
+        pairs = []
+        geno_data == soup.find("table", attrs={'class':"sortable"}).findAll("td")
+        for line in geno_data:
+            genotype = line.find_all("a")
+            if genotype == []:
+                pass
+            else: 
+                pair = ""
+                pre_pair = genotype[0].getText()
+                for character in pre_pair:
+                    if character not in ["(",";",")"]:
+                        pair = pair + character
+                pairs.append(pair)
+        
+    
+    snpedia_data[rsid] = {}
+    snpedia_data[rsid]['rsid'] = rsid
+    print snpedia_data[rsid]['rsid']
+    
+    if orientation == None:
+        snpedia_data[rsid]['orientation'] = ""
+    else:
+        snpedia_data[rsid]['orientation'] = orientation
+    
+    if chromosome == None:
+        snpedia_data[rsid]['chromosome'] = ""
+    else:
+        snpedia_data[rsid]['chromosome'] = chromosome
+    
+    if gmaf == None:
+        snpedia_data[rsid]['GMAF'] = ""
+    else:
+        snpedia_data[rsid]['GMAF'] = gmaf
+    
+    if position == None:
+        snpedia_data[rsid]['position'] = ""
+    else:
+        snpedia_data[rsid]['position'] = position
+    
+    if open_snp_link == None:
+        snpedia_data[rsid]['open_snp_link'] = ""
+    else:
+        snpedia_data[rsid]['open_snp_link'] = open_snp_link
+    
+    if pairs == None:
+        snpedia_data[rsid]['pairs'] = ""
+    else:
+        snpedia_data[rsid]['pairs'] = pairs
+    
+    
+    print snpedia_data[rsid]['orientation']
+    print snpedia_data[rsid]['chromosome']
+    print snpedia_data[rsid]['GMAF']
+    print snpedia_data[rsid]['position']
+    print snpedia_data[rsid]['open_snp_link']
+    print snpedia_data[rsid]['pairs']
+    #{'rsid_string':{'orientation':[], 'chromosome':[], 'GMAF':[], 'position':[], 'open_snp_link':[], 'genos': {'pair':{'msg':[],'summary':[]}}}}
+    #print position
+    #print gene
+    #print rsid
+    #print orientation
+    #print chromosome
+    #print gmaf
+    #print open_snp_link
+    #print pairs
 
 # <codecell>
 
+snpedia_data
+
+# <codecell>
+
+open_snp_users = {}
 
