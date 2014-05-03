@@ -3,7 +3,8 @@
 
 # <codecell>
 
-from pattern.web import extension, find_urls, URL, DOM, abs, re
+from pattern.web import extension, find_urls, URL, DOM, abs
+import re
 
 # <codecell>
 
@@ -20,12 +21,26 @@ dom
 # <codecell>
 
 relevant_links = []
+urls = []
+
 for link in dom('a'):
     all_urls = abs(link.attributes.get('href',''), base=url.redirect or url.string)
-    urls = all_urls.lower()
-    for url in urls:
-        link = re.match(
+    urls.append(all_urls)
+    
+for item in urls:
+    lower = item.lower() 
+    if re.search(r'rs[\d]+', lower):
+        relevant_links.append(lower)
         
+print relevant_links
+    
+
+# <codecell>
+
+for relevant_link in relevant_links:
+    data = URL(relevant_link)
+    site = data.download()
+    
 
 # <codecell>
 
