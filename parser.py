@@ -59,7 +59,7 @@ for page in relevant_links:
         pairs = []
     else:
         pairs = []
-        geno_data == soup.find("table", attrs={'class':"sortable"}).findAll("td")
+        geno_data = soup.find("table", attrs={'class':"sortable"}).findAll("td")
         for line in geno_data:
             genotype = line.find_all("a")
             if genotype == []:
@@ -126,21 +126,15 @@ for page in relevant_links:
 
 # <codecell>
 
-snpedia_data
+### get the valuable users and relevant information
 
-# <codecell>
-
-### get the valuable users
-
-open_snp_users = {}
+#open_snp_users = {}
 
 valued_users_url = URL('https://opensnp.org/achievements/10')
 dom_valued_users = DOM(valued_users_url.download())
-
-valued_users = {}
-
 users_soup = BeautifulSoup(valued_users_url.download())
 
+valued_users = {}
 users_re = re.compile(r'/users/(\d+)')
 for link in dom_valued_users('a'):
     attributes = link.attrs['href']
@@ -152,19 +146,72 @@ for link in dom_valued_users('a'):
         valued_users[user_id]['user_name'] = users_soup.find("a", attrs={'href':users_url}).getText().lower()
         valued_users[user_id]['user_url'] = "https://opensnp.org" + users_url
 
+print valued_users
+
 # <codecell>
 
-users = {}
-
-test_users = valued_users[0:2]
-
-for user in test_users:  #valued_users:
-    user_url = "https://opensnp.org/users/" + user
-    print user_url
+data_download_re = re.compile(r'/data/[A-Za-z0-9._%+-?]+')
+phenotype_re = re.compile(r'/phenotypes/(\d+)')
+for userid in valued_users:
+    users_page = URL(valued_users[userid]['user_url'])
+    user_phenotype_soup = BeautifulSoup(users_page)
     
-    downloaded_url = URL(user_url)
-    print downloaded_url
+    for li in user_phenotype_soup.findAll('li'):
+        for a in li.findAll('a'):
+            link_match = data_download_re.match(a.attrs['href'])
+            if link_match:
+                user_data_download_url = link_match.group()
+    ### fix multiple URLs issue
+      
     
-    soup = BeautifulSoup(downloaded_url.download())
-    print soup
+    if user_phenotype_soup.find("table", attrs={'class':'table table-striped'}):
+        for tr in user_phenotype_soup.find("table", attrs={'class':'table table-striped'}).findAll('tr'):
+            for td in tr.findAll('td'):
+                
+                if td.find('a'):
+                    phenotype = td.find('a').getText()
+                    match = phenotype_re.match(td.find('a').attrs['href'])
+                    if match:
+                        phenotype_id = match.group(1)
+    
+                    #print phenotype
+                variation = td.getText()
+                        #print variation
+            #print phenotype_id, phenotype, variation
+        valued_users[userid]['phenotypes'] = {}
+        valued_users[userid]['phenotypes'][phenotype_id] = {}
+        valued_users[userid]['phenotypes'][phenotype_id]['phenotype'] = phenotype
+        valued_users[userid]['phenotypes'][phenotype_id]['variation'] = variation
+    else:
+        print valued_users[userid]['user_name'] + " doesn't have any phenotypes!"
+    
+    valued_users[userid]['data_download_url'] = "https://opensnp.org" + user_data_download_url 
+    
+    print "scraped user with id " + valued_users[userid]['user_name']
+    
+print len(valued_users)
+
+# <codecell>
+
+test = snpedia_data.keys()[0]
+
+print test
+
+snp_data_url = URL('https://opensnp.org/snps/' + test)
+
+snp_data_soup = BeautifulSoup(snp_data_url.download())
+
+download_links = snp_data_soup.findAll('a')
+print download_links
+
+
+
+
+# <codecell>
+
+e = {"a":1}
+print len(e)
+
+# <codecell>
+
 
