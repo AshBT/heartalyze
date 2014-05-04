@@ -10,14 +10,7 @@ from bs4 import BeautifulSoup
 # <codecell>
 
 url = URL('http://www.snpedia.com/index.php/Heart_disease')
-
-# <codecell>
-
 dom = DOM(url.download())
-
-# <codecell>
-
-dom
 
 # <codecell>
 
@@ -32,12 +25,6 @@ for item in urls:
     lower = item.lower() 
     if re.search(r'rs[\d]+', lower):
         relevant_links.append(lower)
-        
-#print relevant_links
-
-for page in relevant_links:
-    print page
-    
 
 # <codecell>
 
@@ -143,5 +130,41 @@ snpedia_data
 
 # <codecell>
 
+### get the valuable users
+
 open_snp_users = {}
+
+valued_users_url = URL('https://opensnp.org/achievements/10')
+dom_valued_users = DOM(valued_users_url.download())
+
+valued_users = {}
+
+users_soup = BeautifulSoup(valued_users_url.download())
+
+users_re = re.compile(r'/users/(\d+)')
+for link in dom_valued_users('a'):
+    attributes = link.attrs['href']
+    match = users_re.match(attributes)
+    if match:
+        user_id = str(match.group(1))
+        valued_users[user_id] = {}
+        users_url = "/users/" + user_id
+        valued_users[user_id]['user_name'] = users_soup.find("a", attrs={'href':users_url}).getText().lower()
+        valued_users[user_id]['user_url'] = "https://opensnp.org" + users_url
+
+# <codecell>
+
+users = {}
+
+test_users = valued_users[0:2]
+
+for user in test_users:  #valued_users:
+    user_url = "https://opensnp.org/users/" + user
+    print user_url
+    
+    downloaded_url = URL(user_url)
+    print downloaded_url
+    
+    soup = BeautifulSoup(downloaded_url.download())
+    print soup
 
