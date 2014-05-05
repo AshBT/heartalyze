@@ -15,7 +15,7 @@ Heartalyze
 
 <b>Data Gathering:</b>
 ------------------------
-- Check out this video on youtube: <a href="https://www.youtube.com/watch?v=PdIP0BoD5vw">link</a>
+- Check out this video on youtube: <a href="https://www.youtube.com/watch?v=PdIP0BoD5vw" target="_blank">link</a>
 
 <b>How does data look like:</b>
 -------------------------------
